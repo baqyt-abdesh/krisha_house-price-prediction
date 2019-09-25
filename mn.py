@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup as bs
 import csv
 from concurrent.futures import ThreadPoolExecutor
 
-
 count = 0
 start_url = 'https://krisha.kz/prodazha/kvartiry/nur-sultan/'
 paging = 'https://krisha.kz/prodazha/kvartiry/nur-sultan/?page='
@@ -12,23 +11,15 @@ main_url = 'https://krisha.kz'
 ex1 = ThreadPoolExecutor(max_workers=20)
 ex2 = ThreadPoolExecutor(max_workers=20)
 
-
 with open('krisha.csv', 'w') as f:
     w = csv.writer(f)
     w.writerow(['rooms', 'area', 'year', 'price', 'url'])
-
-
-
-
 
 html = requests.get(start_url).text
 soup = bs(html, 'html.parser')
 nav = soup.find('nav', class_='paginator')
 alar = nav.findAll('a')
 san = int(alar[-2].getText().strip())
-
-
-
 
 def get_infos(url):
     try:
@@ -38,7 +29,8 @@ def get_infos(url):
         soup = bs(html, 'html.parser')
         h1 = soup.find('h1').getText().strip()
         room_count = h1[: h1.index('-')]
-        area = h1.split()[2]
+        #area = h1.split()[2]
+        area = soup.find('div', {"data-name": "live.square"}).find('div', class_='offer__advert-short-info').getText().split()[0]
         price = ''
         k = soup.find('div', class_='offer__price').getText().strip().split()
         for x in k:
@@ -59,9 +51,6 @@ def get_infos(url):
         elif (len(t) == 2):
             year = t[0]
 
-
-
-
         with open('krisha.csv', 'a') as f:
             w = csv.writer(f)
             w.writerow([room_count, area, year, price, url])
@@ -70,11 +59,6 @@ def get_infos(url):
     except:
         count += 1
         print('no', count)
-
-
-
-
-
 
 def get_page_infos(url):
     try:
@@ -90,18 +74,6 @@ def get_page_infos(url):
     except:
         pass
 
-
-
 for i in range(1, san + 1):
     # get_page_infos(paging + str(i))
     ex1.submit(get_page_infos, paging + str(i))
-
-
-
-
-
-
-
-
-
-
